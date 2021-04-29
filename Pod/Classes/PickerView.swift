@@ -537,6 +537,7 @@ open class PickerView: UIView {
         }
         
         currentSelectedRow = finalRow
+        currentSelectedCellPosition = CGFloat(currentSelectedRow) * rowHeight
         
         if triggerDelegateMethod {
             delegate?.pickerView?(self, didSelectRow: indexForRow(currentSelectedRow))
