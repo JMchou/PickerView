@@ -163,12 +163,25 @@ open class PickerView: UIView {
         return tableView
     }()
     
+    fileprivate var currentSelectedCellPosition: CGFloat = 0
     fileprivate var infinityRowsMultiplier: Int = 1
     fileprivate var hasTouchedPickerViewYet = false
     open var currentSelectedRow: Int!
     open var currentSelectedIndex: Int {
         get {
             return indexForRow(currentSelectedRow)
+        }
+    }
+
+    open var currentSelectedCellLabel: UILabel? {
+        guard setupHasBeenDone else { return nil }
+        let partialRow = Float(currentSelectedCellPosition / rowHeight)
+        let roundedRow = Int(lroundf(partialRow))
+        
+        if let currentSelectedCell = tableView.cellForRow(at: IndexPath(row: roundedRow, section: 0)) as? SimplePickerTableViewCell {
+            return currentSelectedCell.titleLabel
+        } else {
+            return nil
         }
     }
     
@@ -475,7 +488,7 @@ open class PickerView: UIView {
     */
     fileprivate func selectTappedRow(_ row: Int) {
         delegate?.pickerView?(self, didTapRow: indexForRow(row))
-        selectRow(row, animated: true)
+        selectRow(row, animated: true, triggerDelegateMethod: true)
     }
 
     fileprivate func turnPickerViewOn() {
@@ -514,7 +527,7 @@ open class PickerView: UIView {
         return indexForSelectedRow
     }
     
-    open func selectRow(_ row : Int, animated: Bool) {
+    open func selectRow(_ row : Int, animated: Bool, triggerDelegateMethod: Bool) {
         var finalRow = row
         
         if (scrollingStyle == .infinite && row <= numberOfRowsByDataSource) {
@@ -525,7 +538,9 @@ open class PickerView: UIView {
         
         currentSelectedRow = finalRow
         
-        delegate?.pickerView?(self, didSelectRow: indexForRow(currentSelectedRow))
+        if triggerDelegateMethod {
+            delegate?.pickerView?(self, didSelectRow: indexForRow(currentSelectedRow))
+        }
         
         tableView.setContentOffset(CGPoint(x: 0.0, y: CGFloat(currentSelectedRow) * rowHeight), animated: animated)
     }
@@ -659,6 +674,7 @@ extension PickerView: UIScrollViewDelegate {
     }
     
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        currentSelectedCellPosition = scrollView.contentOffset.y
         let partialRow = Float(scrollView.contentOffset.y / rowHeight)
         let roundedRow = Int(lroundf(partialRow))
         
