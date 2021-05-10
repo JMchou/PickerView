@@ -396,7 +396,7 @@ open class PickerView: UIView {
         } else if numberOfRowsByDataSource < 50 && numberOfRowsByDataSource > 25 {
             return 400
         } else {
-            return 800
+            return 400
         }
     }
     
@@ -518,7 +518,8 @@ open class PickerView: UIView {
         if let _ = currentSelectedRow , scrollingStyle == .default && currentSelectedRow == 0 {
             indexForSelectedRow = 0
         } else if let _ = currentSelectedRow {
-            indexForSelectedRow = middleIndex - (numberOfRowsByDataSource - currentSelectedRow)
+            let modifiedIndex = middleIndex - (numberOfRowsByDataSource - currentSelectedRow)
+            indexForSelectedRow = currentSelectedRow > numberOfRowsByDataSource ? currentSelectedRow : modifiedIndex
         } else {
             let middleRow = Int(floor(Float(indexesByDataSource) / 2.0))
             indexForSelectedRow = middleIndex - (numberOfRowsByDataSource - middleRow)
